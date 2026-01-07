@@ -6,37 +6,53 @@ const User = require("../models/User");
 const router = express.Router();
 
 
+
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, phone, password } = req.body;
 
-    const exist = await User.findOne({ email });
+    if (!name || !phone || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    name = name.trim();
+    phone = phone.replace(/\s+/g, "");
+
+    const exist = await User.findOne({ phone });
     if (exist) {
       return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    await User.create({
       name,
-      email,
+      phone,
       password: hashedPassword,
     });
 
-    res.json({ message: "User registered successfully" });
+    res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
 
+
+
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ phone });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+   
+    if (!user.isActive) {
+      return res.status(403).json({ message: "Account is deactivated. Contact admin." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -55,12 +71,15 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email,
+        phone: user.phone,
       },
     });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+
 
 module.exports = router;

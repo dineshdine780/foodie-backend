@@ -15,12 +15,23 @@ router.get("/public", async (req, res) => {
 });
 
 
-router.get("/", protectAdmin, async (req, res) => {
-  const foods = await Food.find().sort({ createdAt: -1 });
-  res.json(foods);   
+// router.get("/", protectAdmin, async (req, res) => {
+//   const foods = await Food.find().sort({ createdAt: -1 });
+//   res.json(foods);   
+// });
+
+
+router.get("/", async (req, res) => {
+  try {
+    const foods = await Food.find();
+    res.json(foods);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch foods" });
+  }
 });
-
-
+ 
+ 
+ 
 router.post("/", protectAdmin, async (req, res) => {
   const { name, price, image, category } = req.body;
 

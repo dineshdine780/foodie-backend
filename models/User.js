@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email: {
+    phone: {
       type: String,
       required: true,
       unique: true,
@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isActive: { type: Boolean, default: false },  
+    dailyOrderLimit: { type: Number, default: 5 }, 
+    ordersToday: { type: Number, default: 0 }, 
+
+    lastOrderDate: { type: String },
   },
   { timestamps: true }
 );
